@@ -2,3 +2,5 @@
 .env
 *.log
 *.pyc
+app_rmq.log
+*.log
