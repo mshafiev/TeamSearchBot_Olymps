@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  olymps:
+    build: .
+    environment:
+      DB_SERVER_HOST: ${DB_SERVER_HOST:-localhost}
+      DB_SERVER_PORT: ${DB_SERVER_PORT:-8005}
+      RMQ_HOST: ${RMQ_HOST:-localhost}
+      RMQ_PORT: ${RMQ_PORT:-5672}
+      RMQ_USER: ${RMQ_USER:-guest}
+      RMQ_PASS: ${RMQ_PASS:-guest}
+    restart: unless-stopped
+
+

@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List, Optional
 
+import re
+import json
+
 import requests
 
 
@@ -18,6 +21,7 @@ class OlympRecord:
 
 
 BASE_STATIC_PATH = "/files/rsosh-diplomas-static"
+PATTERN = r"^№\d+\. '(.+?)' \('(.+?)'\), (\d+) уровень\. Диплом (\d+) степени\.$"
 
 
 def normalize_fio(fio: str) -> str:
@@ -36,7 +40,7 @@ def person_hash(fio: str, birthdate: str) -> str:
     return hashlib.sha256(namestring.encode("utf-8")).hexdigest()
 
 
-def build_codes_url(base_url: str, year: int, person_hash: str) -> str:
+def build_url(base_url: str, year: int, person_hash: str) -> str:
     return f"{base_url.rstrip('/')}{BASE_STATIC_PATH}/compiled-storage-{year}/by-person-released/{person_hash}/codes.js"
 
 
@@ -49,9 +53,6 @@ def head_exists(url: str, timeout: float = 5.0) -> bool:
     except requests.RequestException:
         return False
 
-
-import re
-import json
 
 def parse_js_array(js_str):
     js_str = re.sub(r"^diplomaCodes\s*=", "", js_str.strip())
@@ -92,16 +93,15 @@ def find_olymps(fio: str, birthdate_dd_mm_yyyy: str, base_url: str = "https://di
 
     results = []
     for year in years:
-        url = build_codes_url(base_url, year, person)
+        url = build_url(base_url, year, person)
         if not head_exists(url):
             continue
         payload = fetch_codes(url)
         
         if not payload:
             continue
-        pattern = r"^№\d+\. '(.+?)' \('(.+?)'\), (\d+) уровень\. Диплом (\d+) степени\.$"
         for entry in payload:
-            match = re.match(pattern, entry.get('oa', ''))
+            match = re.match(PATTERN, entry.get('oa', ''))
             if match:
                 olymp_name, profile, level, result = match.groups()
                 entry['olymp_name'] = olymp_name
