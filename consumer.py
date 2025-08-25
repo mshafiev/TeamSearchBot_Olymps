@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import json
 from parser import find_olymps
 import requests
+from producer import send_olymps_success
 
 load_dotenv()
 
@@ -55,6 +56,8 @@ def callback(ch, method, properties, body):
             except Exception as e:
                 logger.error(f"Ошибка при добавлении олимпиады: {e}")
         ch.basic_ack(delivery_tag=method.delivery_tag)
+        message_data = {"user_id": str(user_tg_id)}
+        send_olymps_success(message_data)
     except json.JSONDecodeError as e:
         logger.error(f"Ошибка декодирования JSON: {e}")
     except Exception as e:
