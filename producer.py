@@ -6,8 +6,6 @@ from dotenv import load_dotenv
 import logging
 import asyncio
 
-from app.validators import is_valid_user_id, validate_message_text
-
 
 logging.getLogger("pika").setLevel(logging.WARNING)
 
